@@ -1,0 +1,22 @@
+2025-10-21 22:47:15,565 - src.data_processor - INFO - DataProcessor initialized
+2025-10-21 22:47:15,566 - src.model_manager - INFO - ModelManager initialized with directory: models
+2025-10-21 22:47:15,566 - src.data_processor - INFO - DataProcessor initialized
+2025-10-21 22:47:15,567 - src.fraud_detector - INFO - FraudDetector initialized
+2025-10-21 22:47:15,569 - __main__ - INFO - Starting FraudGuard Backend Server...
+2025-10-21 22:47:15,569 - src.model_manager - WARNING - Model file not found: models\fraud_detection_model.pkl
+2025-10-21 22:47:15,569 - __main__ - INFO - No existing model found. Train a model using /api/train endpoint
+2025-10-21 22:47:15,620 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.29.127:5000
+2025-10-21 22:47:15,620 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-10-21 22:47:15,622 - werkzeug - INFO -  * Restarting with stat
+2025-10-21 22:47:18,122 - src.data_processor - INFO - DataProcessor initialized
+2025-10-21 22:47:18,123 - src.model_manager - INFO - ModelManager initialized with directory: models
+2025-10-21 22:47:18,124 - src.data_processor - INFO - DataProcessor initialized
+2025-10-21 22:47:18,124 - src.fraud_detector - INFO - FraudDetector initialized
+2025-10-21 22:47:18,126 - __main__ - INFO - Starting FraudGuard Backend Server...
+2025-10-21 22:47:18,126 - src.model_manager - WARNING - Model file not found: models\fraud_detection_model.pkl
+2025-10-21 22:47:18,127 - __main__ - INFO - No existing model found. Train a model using /api/train endpoint
+2025-10-21 22:47:18,135 - werkzeug - WARNING -  * Debugger is active!
+2025-10-21 22:47:18,160 - werkzeug - INFO -  * Debugger PIN: 615-041-075
