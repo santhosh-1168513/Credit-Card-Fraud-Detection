@@ -580,3 +580,18 @@ footer a:hover {
         border: 1px solid #dee2e6 !important;
     }
 }
+
+/*dark mode styles*/
+.dark-mode {
+    background: #1a1a1a !important;
+    color: #e0e0e0 !important;
+}
+
+.dark-mode .card {
+    background: #2d2d2d !important;
+    color: #e0e0e0 !important;
+}
+
+.dark-mode .table {
+    color: #e0e0e0 !important;
+}

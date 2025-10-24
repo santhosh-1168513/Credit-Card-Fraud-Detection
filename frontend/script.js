@@ -756,3 +756,101 @@ window.analyzeTransactions = analyzeTransactions;
 window.filterResults = filterResults;
 window.viewTransactionDetails = viewTransactionDetails;
 window.exportResults = exportResults;
+
+
+/**
+ * Save analysis results to localStorage for persistence across page loads.
+ */
+function saveResults() {
+    // Convert the analysis results array to a JSON string and save it
+    localStorage.setItem('fraudGuard_results', JSON.stringify(analysisResults));
+    // Save the timestamp separately
+    localStorage.setItem('fraudGuard_timestamp', new Date().toISOString());
+    console.log("✅ Results saved to localStorage. Preparing redirect...");
+}
+
+
+/**
+ * Initialize results page by loading data from localStorage.
+ */
+function initResultsPage() {
+    // Retrieve the data string from localStorage
+    const resultsJSON = localStorage.getItem('fraudGuard_results');
+    const timestamp = localStorage.getItem('fraudGuard_timestamp');
+
+    let results = null;
+
+    if (resultsJSON) {
+        // Parse the JSON string back into a JavaScript object array
+        results = JSON.parse(resultsJSON);
+    }
+
+    if (!results || results.length === 0) {
+        console.warn("⚠️ No valid results found in localStorage. Redirecting.");
+        // If no results, clear storage and redirect
+        localStorage.removeItem('fraudGuard_results');
+        localStorage.removeItem('fraudGuard_timestamp');
+        window.location.href = 'upload.html';
+        return;
+    }
+    
+    // Assign to a global variable for the current session (optional but helpful)
+    window.analysisResults = results;
+    window.analysisTimestamp = timestamp;
+
+    displayResults(results);
+}
+//tractision searching
+/**
+ * Search/Filter transactions in the table
+ * Called every time user types in the search box
+ */
+function searchTransactions() {
+    console.log('🔍 Searching...');
+    
+    // Get the search box value
+    const searchBox = document.getElementById('searchBox');
+    const searchTerm = searchBox.value.toLowerCase().trim();
+    
+    console.log('Search term:', searchTerm);
+    
+    // Get all table rows
+    const tableBody = document.getElementById('resultsTableBody');
+    const rows = tableBody.getElementsByTagName('tr');
+    
+    let visibleCount = 0;
+    let hiddenCount = 0;
+    
+    // Loop through each row
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        
+        // Get all text in this row
+        const rowText = row.textContent.toLowerCase();
+        
+        // Check if search term is in the row
+        if (searchTerm === '' || rowText.includes(searchTerm)) {
+            // Show this row
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            // Hide this row
+            row.style.display = 'none';
+            hiddenCount++;
+        }
+    }
+    
+    console.log(`✅ Showing ${visibleCount} rows, hiding ${hiddenCount} rows`);
+    
+    // Optional: Show message if no results
+    const noResults = document.getElementById('noResults');
+    if (visibleCount === 0 && noResults) {
+        noResults.classList.remove('d-none');
+    } else if (noResults) {
+        noResults.classList.add('d-none');
+    }
+}
+
+// Make function globally accessible
+window.searchTransactions = searchTransactions;
+

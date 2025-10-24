@@ -38,6 +38,7 @@
                     </li>
                 </ul>
             </div>
+            
         </div>
     </nav>
 
@@ -146,6 +147,25 @@
                     <h5 class="mb-0 fw-bold">
                         <i class="bi bi-table me-2"></i>Transaction Details
                     </h5>
+                    <div class="card shadow-sm border-0 mb-3">
+    <div class="card-body">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-search"></i>
+            </span>
+            <input 
+                type="text" 
+                class="form-control form-control-lg" 
+                id="searchBox" 
+                placeholder="Type to search: Transaction ID, Merchant, Location, Amount..."
+                onkeyup="searchTransactions()">
+        </div>
+        <small class="text-muted mt-2 d-block">
+            💡 Tip: Type any word to filter the table below
+        </small>
+    </div>
+</div>
+
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -199,6 +219,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
+
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">

@@ -5,7 +5,40 @@ Flask Backend Server
 Author: Production Team
 Version: 1.0.0
 """
+from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
+import os
+import logging
+from datetime import datetime
+from functools import wraps
 
+# ... other imports ...
+
+app = Flask(__name__)
+
+# ⭐ DISABLE CACHING COMPLETELY
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+# ⭐ Add no-cache headers to all responses
+@app.after_request
+def add_no_cache_headers(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+# Enable CORS
+CORS(app, resources={
+    r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"],
+        "supports_credentials": False
+    }
+})
+###############
+# ... rest of your code ...
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
@@ -410,3 +443,96 @@ if __name__ == '__main__':
         port=5000,
         debug=True
     )
+
+
+    @app.route('/api/predict', methods=['POST'])
+def predict():
+    """
+    Fraud prediction endpoint
+    """
+    try:
+        logger.info("=" * 50)
+        logger.info("NEW PREDICTION REQUEST RECEIVED")
+        logger.info("=" * 50)
+        
+        # Check if model is loaded
+        if not model_manager.is_model_loaded():
+            logger.warning("Model not loaded, attempting to load...")
+            if not model_manager.load_model():
+                return jsonify({
+                    'success': False,
+                    'error': 'No trained model available. Please train a model first using /api/train endpoint.'
+                }), 400
+        
+        # Get file from request
+        if 'file' not in request.files:
+            logger.error("No file in request")
+            return jsonify({
+                'success': False,
+                'error': 'No file provided. Please upload a CSV file.'
+            }), 400
+        
+        file = request.files['file']
+        logger.info(f"File received: {file.filename}")
+        logger.info(f"File size: {file.content_length} bytes")
+        
+        if file.filename == '':
+            logger.error("Empty filename")
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
+        
+        if not allowed_file(file.filename, app.config['ALLOWED_EXTENSIONS']):
+            logger.error(f"Invalid file type: {file.filename}")
+            return jsonify({
+                'success': False,
+                'error': 'Invalid file type. Only CSV files are allowed.'
+            }), 400
+        
+        # ⭐ IMPORTANT: Save with UNIQUE timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')  # Added microseconds
+        filename = f"predict_{timestamp}.csv"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # ⭐ SAVE THE FILE
+        file.save(filepath)
+        logger.info(f"✅ File saved to: {filepath}")
+        
+        # ⭐ READ THE FILE FRESH
+        df = data_processor.read_csv(filepath)
+        logger.info(f"✅ CSV loaded: {len(df)} rows, {len(df.columns)} columns")
+        logger.info(f"✅ First transaction ID: {df['transaction_id'].iloc[0] if 'transaction_id' in df.columns else 'N/A'}")
+        logger.info(f"✅ Last transaction ID: {df['transaction_id'].iloc[-1] if 'transaction_id' in df.columns else 'N/A'}")
+        
+        # Validate CSV structure
+        validation_result = validate_csv_data(df)
+        if not validation_result['valid']:
+            logger.error(f"Invalid CSV: {validation_result['error']}")
+            return jsonify({
+                'success': False,
+                'error': f"Invalid CSV structure: {validation_result['error']}"
+            }), 400
+        
+        # ⭐ PERFORM FRESH FRAUD DETECTION
+        logger.info(f"🔍 Starting fraud detection on {len(df)} transactions...")
+        results = fraud_detector.predict(df)
+        
+        logger.info(f"✅ Prediction completed!")
+        logger.info(f"📊 Total: {results['summary']['total_transactions']}")
+        logger.info(f"📊 Fraud: {results['summary']['fraud_count']}")
+        logger.info(f"📊 Legitimate: {results['summary']['legitimate_count']}")
+        logger.info("=" * 50)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Fraud detection completed successfully',
+            'results': results
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"❌ Prediction failed: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Prediction failed: {str(e)}'
+        }), 500

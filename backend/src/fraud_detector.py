@@ -256,3 +256,62 @@ class FraudDetector:
         """Reset prediction counter"""
         self.prediction_count = 0
         logger.info("Prediction counter reset")
+
+
+####
+
+        def predict(self, df):
+    """
+    Perform fraud detection on transactions
+    
+    Args:
+        df (pd.DataFrame): Transaction data
+        
+    Returns:
+        dict: Fraud detection results
+    """
+    try:
+        logger.info(f"🔍 Starting NEW fraud detection for {len(df)} transactions...")
+        logger.info(f"📊 DataFrame shape: {df.shape}")
+        logger.info(f"📊 Columns: {list(df.columns)}")
+        
+        # ⭐ LOG SAMPLE DATA TO VERIFY IT'S DIFFERENT
+        if 'transaction_id' in df.columns:
+            logger.info(f"📋 First 3 transaction IDs: {df['transaction_id'].head(3).tolist()}")
+            logger.info(f"📋 Last 3 transaction IDs: {df['transaction_id'].tail(3).tolist()}")
+        
+        if 'amount' in df.columns:
+            logger.info(f"💰 Amount range: ${df['amount'].min():.2f} - ${df['amount'].max():.2f}")
+            logger.info(f"💰 Average amount: ${df['amount'].mean():.2f}")
+        
+        # Validate data
+        validation_result = self.data_processor.validate_data(df)
+        if not validation_result['valid']:
+            raise Exception(f"Invalid data: {validation_result['errors']}")
+        
+        # ⭐ PREPROCESS DATA FRESH (no caching)
+        df_processed = self.data_processor.preprocess_data(df.copy())  # Use .copy()!
+        logger.info(f"✅ Data preprocessed: {len(df_processed)} rows")
+        
+        # ⭐ PREPARE FEATURES FRESH
+        X = self.data_processor.prepare_features(df_processed)
+        logger.info(f"✅ Features prepared: shape {X.shape}")
+        
+        # ⭐ MAKE FRESH PREDICTIONS
+        prediction_results = self.model_manager.predict(X)
+        logger.info(f"✅ Predictions generated")
+        
+        # ⭐ PROCESS RESULTS WITH ORIGINAL DATA
+        results = self._process_predictions(df, prediction_results)
+        
+        # Update prediction counter
+        self.prediction_count += len(df)
+        
+        logger.info(f"✅ Fraud detection completed!")
+        logger.info(f"📊 Summary: {results['summary']}")
+        
+        return results
+        
+    except Exception as e:
+        logger.error(f"❌ Prediction workflow failed: {str(e)}", exc_info=True)
+        raise Exception(f"Fraud detection failed: {str(e)}")
