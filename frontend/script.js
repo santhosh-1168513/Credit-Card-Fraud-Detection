@@ -854,3 +854,185 @@ function searchTransactions() {
 // Make function globally accessible
 window.searchTransactions = searchTransactions;
 
+// ==========================================
+// DARK MODE FUNCTIONALITY
+// ==========================================
+
+/**
+ * Toggle dark mode on/off
+ */
+function toggleDarkMode() {
+    console.log('🌙 Toggling dark mode...');
+    
+    const body = document.body;
+    const isDark = body.classList.toggle('dark-mode');
+    
+    // Save preference to localStorage
+    localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+    
+    // Update button icon
+    updateDarkModeButton(isDark);
+    
+    console.log('✅ Dark mode:', isDark ? 'ON' : 'OFF');
+    
+    // Show notification
+    showDarkModeNotification(isDark);
+}
+
+/**
+ * Update dark mode button icon
+ */
+function updateDarkModeButton(isDark) {
+    const button = document.getElementById('darkModeToggle');
+    if (button) {
+        const icon = button.querySelector('i');
+        if (icon) {
+            icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+        }
+        button.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+    }
+}
+
+/**
+ * Show notification when mode changes
+ */
+function showDarkModeNotification(isDark) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: ${isDark ? '#161b22' : '#ffffff'};
+        color: ${isDark ? '#c9d1d9' : '#212529'};
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+        border: 2px solid ${isDark ? '#30363d' : '#dee2e6'};
+    `;
+    notification.innerHTML = `
+        <i class="bi bi-${isDark ? 'moon-stars-fill' : 'sun-fill'} me-2"></i>
+        ${isDark ? 'Dark' : 'Light'} mode activated
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 2000);
+}
+
+/**
+ * Initialize dark mode on page load
+ */
+function initDarkMode() {
+    console.log('🔧 Initializing dark mode...');
+    
+    // Check saved preference
+    const darkMode = localStorage.getItem('darkMode');
+    
+    if (darkMode === 'enabled') {
+        document.body.classList.add('dark-mode');
+        updateDarkModeButton(true);
+        console.log('✅ Dark mode loaded from storage');
+    } else {
+        console.log('✅ Light mode active');
+    }
+}
+
+/**
+ * Create dark mode toggle button
+ */
+function createDarkModeButton() {
+    // Check if button already exists
+    if (document.getElementById('darkModeToggle')) {
+        return;
+    }
+    
+    const button = document.createElement('button');
+    button.id = 'darkModeToggle';
+    button.className = 'dark-mode-toggle';
+    button.setAttribute('aria-label', 'Toggle Dark Mode');
+    button.setAttribute('title', 'Toggle Dark Mode');
+    
+    const isDark = document.body.classList.contains('dark-mode');
+    button.innerHTML = `<i class="bi bi-${isDark ? 'sun-fill' : 'moon-stars-fill'}"></i>`;
+    
+    button.onclick = toggleDarkMode;
+    
+    document.body.appendChild(button);
+    console.log('✅ Dark mode button created');
+}
+
+// ==========================================
+// AUTO-INITIALIZE DARK MODE
+// ==========================================
+
+// Initialize dark mode as early as possible (before page loads)
+(function() {
+    const darkMode = localStorage.getItem('darkMode');
+    if (darkMode === 'enabled') {
+        document.documentElement.classList.add('dark-mode');
+        document.body.classList.add('dark-mode');
+    }
+})();
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 Page loaded, setting up dark mode...');
+    
+    // Initialize dark mode
+    initDarkMode();
+    
+    // Create toggle button
+    createDarkModeButton();
+    
+    console.log('✅ Dark mode setup complete');
+});
+
+// Make functions globally accessible
+window.toggleDarkMode = toggleDarkMode;
+window.initDarkMode = initDarkMode;
+
+// Add CSS animation for notification
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+console.log('🌙 Dark mode module loaded');
+
+// Keyboard shortcut for dark mode: Ctrl+D or Cmd+D
+// Keyboard shortcut: Ctrl+D or Cmd+D
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        toggleDarkMode();
+    }
+});
+
+
+///work on 25
